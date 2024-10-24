@@ -17,7 +17,7 @@ endif()
 add_compile_definitions(APP_VERSION="1.1.9")
 add_compile_definitions(QT_NO_DEBUG)
 
-find_package(Qt5 COMPONENTS Core Widgets OpenGL SerialPort REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets OpenGL OpenGLWidgets SerialPort REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
@@ -28,7 +28,7 @@ file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/*.cpp
                     ${PROJECT_SOURCE_DIR}/tables/*.cpp
                     )
 
-qt5_add_resources(SHADER_RSC 
+qt6_add_resources(SHADER_RSC
     ${PROJECT_SOURCE_DIR}/shaders.qrc
     ${PROJECT_SOURCE_DIR}/images.qrc
     ${PROJECT_SOURCE_DIR}/fonts.qrc
@@ -42,9 +42,10 @@ else()
 endif()
 
 target_link_libraries(Candle
-    Qt5::Core
-    Qt5::Widgets
-    Qt5::OpenGL
-    Qt5::Gui
-    Qt5::SerialPort
+    Qt6::Core
+    Qt6::Widgets
+    Qt6::OpenGL
+    Qt6::OpenGLWidgets
+    Qt6::Gui
+    Qt6::SerialPort
     )

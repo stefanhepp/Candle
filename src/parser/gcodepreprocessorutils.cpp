@@ -5,11 +5,10 @@
 
 // Copyright 2015-2016 Hayrullin Denis Ravilevich
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QDebug>
 #include <QVector3D>
 #include "gcodepreprocessorutils.h"
-#include "limits"
 #include "../tables/gcodetablemodel.h"
 
 /**
@@ -20,12 +19,13 @@
 */
 QString GcodePreprocessorUtils::overrideSpeed(QString command, double speed, double *original)
 {
-    static QRegExp re("[Ff]([0-9.]+)");
+    static QRegularExpression re("[Ff]([0-9.]+)");
+    QRegularExpressionMatch match = re.match(command);
 
-    if (re.indexIn(command) != -1) {
-        command.replace(re, QString("F%1").arg(re.cap(1).toDouble() / 100 * speed));
+    if (match.hasMatch()) {
+        command.replace(re, QString("F%1").arg(match.captured(1).toDouble() / 100 * speed));
 
-        if (original) *original = re.cap(1).toDouble();
+        if (original) *original = match.captured(1).toDouble();
     }
 
     return command;
@@ -36,8 +36,8 @@ QString GcodePreprocessorUtils::overrideSpeed(QString command, double speed, dou
 */
 QString GcodePreprocessorUtils::removeComment(QString command)
 {
-    static QRegExp rx1("\\(+[^\\(]*\\)+");
-    static QRegExp rx2(";.*");
+    static QRegularExpression rx1("\\(+[^\\(]*\\)+");
+    static QRegularExpression rx2(";.*");
 
     // Remove any comments within ( parentheses ) using regex "\([^\(]*\)"
     if (command.contains('(')) command.remove(rx1);
@@ -57,23 +57,25 @@ QString GcodePreprocessorUtils::parseComment(QString command)
     // "(?<=\()[^\(\)]*|(?<=\;)[^;]*"
     // "(?<=\\()[^\\(\\)]*|(?<=\\;)[^;]*"
 
-    static QRegExp re("(\\([^\\(\\)]*\\)|;[^;].*)");
+    static QRegularExpression re("(\\([^\\(\\)]*\\)|;[^;].*)");
+    QRegularExpressionMatch match = re.match(command);
 
-    if (re.indexIn(command) != -1) {
-        return re.cap(1);
+    if (match.hasMatch()) {
+        return match.captured(1);
     }
     return "";
 }
 
 QString GcodePreprocessorUtils::truncateDecimals(int length, QString command)
 {
-    static QRegExp re("(\\d*\\.\\d*)");
+    static QRegularExpression re("(\\d*\\.\\d*)");
     int pos = 0;
 
-    while ((pos = re.indexIn(command, pos)) != -1)
+    QRegularExpressionMatch match;
+    while ((match = re.match(command, pos)).hasMatch())
     {
-        QString newNum = QString::number(re.cap(1).toDouble(), 'f', length);
-        command = command.left(pos) + newNum + command.mid(pos + re.matchedLength());
+        QString newNum = QString::number(match.captured(1).toDouble(), 'f', length);
+        command = command.left(pos) + newNum + command.mid(pos + match.capturedLength(0));
         pos += newNum.length() + 1;
     }
 
@@ -82,7 +84,7 @@ QString GcodePreprocessorUtils::truncateDecimals(int length, QString command)
 
 QString GcodePreprocessorUtils::removeAllWhitespace(QString command)
 {
-    static QRegExp rx("\\s");
+    static QRegularExpression rx("\\s");
 
     return command.remove(rx);
 }
@@ -100,14 +102,12 @@ QList<float> GcodePreprocessorUtils::parseCodes(const QStringList &args, char co
 
 QList<int> GcodePreprocessorUtils::parseGCodes(QString command)
 {
-    static QRegExp re("[Gg]0*(\\d+)");
+    static QRegularExpression re("[Gg]0*(\\d+)");
 
     QList<int> codes;
-    int pos = 0;
 
-    while ((pos = re.indexIn(command, pos)) != -1) {
-        codes.append(re.cap(1).toInt());
-        pos += re.matchedLength();
+    for (const QRegularExpressionMatch &match : re.globalMatch(command)) {
+        codes.append(match.captured(1).toInt());
     }
 
     return codes;
@@ -115,14 +115,12 @@ QList<int> GcodePreprocessorUtils::parseGCodes(QString command)
 
 QList<int> GcodePreprocessorUtils::parseMCodes(QString command)
 {
-    static QRegExp re("[Mm]0*(\\d+)");
+    static QRegularExpression re("[Mm]0*(\\d+)");
 
     QList<int> codes;
-    int pos = 0;
 
-    while ((pos = re.indexIn(command, pos)) != -1) {
-        codes.append(re.cap(1).toInt());
-        pos += re.matchedLength();
+    for (const QRegularExpressionMatch &match : re.globalMatch(command)) {
+        codes.append(match.captured(1).toInt());
     }
 
     return codes;
@@ -431,9 +429,9 @@ QList<QVector3D> GcodePreprocessorUtils::generatePointsAlongArcBDring(PointSegme
         m.rotate(-90, 0.0, 1.0, 0.0);
         break;
     }
-    start = m * start;
-    end = m * end;
-    center = m * center;
+    start = m.map(start);
+    end = m.map(end);
+    center = m.map(center);
 
     // Check center
     if (qIsNaN(center.length())) return QList<QVector3D>();
@@ -518,10 +516,10 @@ QList<QVector3D> GcodePreprocessorUtils::generatePointsAlongArcBDring(PointSegme
         lineEnd.setY(sin(angle) * radius + center.y());
         lineEnd.setZ(lineEnd.z() + zIncrement);
 
-        segments.append(m * lineEnd);
+        segments.append(m.map(lineEnd));
     }
 
-    segments.append(m * p2);
+    segments.append(m.map(p2));
 
     return segments;
 }

@@ -4,11 +4,7 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#ifndef GLES
-#include <QGLWidget>
-#else
 #include <QOpenGLWidget>
-#endif
 
 #include <QTimer>
 #include <QTime>
@@ -17,7 +13,7 @@
 #ifdef GLES
 class GLWidget : public QOpenGLWidget
 #else
-class GLWidget : public QGLWidget, protected QOpenGLFunctions
+class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 #endif
 {
     Q_OBJECT

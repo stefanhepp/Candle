@@ -3,13 +3,14 @@
 
 #include <QApplication>
 #include <QDebug>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QLocale>
 #include <QTranslator>
 #include <QFile>
 #include <QStyleFactory>
 #include <QFontDatabase>
 #include <QMessageBox>
+#include <QSurfaceFormat>
 
 #include "parser/gcodepreprocessorutils.h"
 #include "parser/gcodeparser.h"
@@ -36,10 +37,10 @@ int main(int argc, char *argv[])
     QFontDatabase::addApplicationFont(":/fonts/Ubuntu-R.ttf");
 #endif
 
-    QGLFormat glf = QGLFormat::defaultFormat();
+    QSurfaceFormat glf = QSurfaceFormat::defaultFormat();
     glf.setSampleBuffers(true);
     glf.setSamples(8);
-    QGLFormat::setDefaultFormat(glf);
+    QSurfaceFormat::setDefaultFormat(glf);
 
 //    QLocale::setDefault(QLocale("es"));
 

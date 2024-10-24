@@ -11,7 +11,6 @@ ColorPicker::ColorPicker(QWidget *parent) :
 
     m_button->setText("...");
 
-    m_layout->setMargin(0);
     m_layout->addWidget(m_frame, 1);
     m_layout->addWidget(m_button);
 

@@ -27,7 +27,7 @@ public:
     void setHighlightColor(const QColor &highlightColor);
 
 protected:
-    void enterEvent(QEvent *);
+    virtual void enterEvent(QEvent *);
     void leaveEvent(QEvent *);
 
 private:
